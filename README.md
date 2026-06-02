@@ -7,7 +7,13 @@ usage and clearing the file cache on demand.
 
 ## Install
 
-Download the latest `.dmg` from
+Install with Homebrew:
+
+```sh
+brew install --cask arturious/tap/kiyomemo
+```
+
+Or download the latest `.dmg` manually from
 [Releases](../../releases/latest), open it, and drag
 `Kiyomemo.app` into `Applications`.
 
