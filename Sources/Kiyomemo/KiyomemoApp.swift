@@ -2,15 +2,22 @@ import AppKit
 import SwiftUI
 
 @main
-struct MemoryBarApp: App {
+struct KiyomemoApp: App {
     @StateObject private var monitor = MemoryMonitor()
 
-    private static func menuBarIcon(freePercentage: Int) -> NSImage {
-        let text = "\(freePercentage)%"
+    private static func menuBarIcon(
+        freePercentage: Int,
+        content: MenuBarBadgeContent,
+        tone: MenuBarBadgeTone
+    ) -> NSImage {
+        let text = content == .percentage ? "\(freePercentage)%" : "kiyo"
         let fontSize: CGFloat = 11.5
         let font = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
+        let opacity: CGFloat = tone == .normal ? 1 : 0.58
+        let badgeColor = NSColor.black.withAlphaComponent(opacity)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
+            .foregroundColor: badgeColor,
             .paragraphStyle: {
                 let style = NSMutableParagraphStyle()
                 style.alignment = .center
@@ -28,16 +35,14 @@ struct MemoryBarApp: App {
             let textRect = bounds.offsetBy(dx: 0, dy: -1)
             (text as NSString).draw(in: textRect, withAttributes: attributes)
 
-            NSColor.black.set()
-            NSGraphicsContext.saveGraphicsState()
-            NSGraphicsContext.current?.compositingOperation = .xor
-            NSBezierPath(roundedRect: bounds, xRadius: 3, yRadius: 3).fill()
-            NSBezierPath(
-                roundedRect: bounds.insetBy(dx: 1, dy: 1),
-                xRadius: 2,
-                yRadius: 2
-            ).fill()
-            NSGraphicsContext.restoreGraphicsState()
+            badgeColor.setStroke()
+            let border = NSBezierPath(
+                roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
+                xRadius: 3,
+                yRadius: 3
+            )
+            border.lineWidth = 1
+            border.stroke()
             return true
         }
         image.isTemplate = true
@@ -48,7 +53,13 @@ struct MemoryBarApp: App {
         MenuBarExtra {
             MemoryPopover(monitor: monitor)
         } label: {
-            Image(nsImage: Self.menuBarIcon(freePercentage: monitor.snapshot.freePercentage))
+            Image(
+                nsImage: Self.menuBarIcon(
+                    freePercentage: monitor.snapshot.freePercentage,
+                    content: monitor.menuBarBadgeContent,
+                    tone: monitor.menuBarBadgeTone
+                )
+            )
         }
         .menuBarExtraStyle(.window)
     }

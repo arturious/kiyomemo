@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 
-private let socketPath = "/var/run/dev.memorybar.helper.sock"
+private let socketPath = "/var/run/dev.kiyomemo.helper.sock"
 
 private func removeSocket() {
     unlink(socketPath)
@@ -107,6 +107,6 @@ do {
         }
     }
 } catch {
-    FileHandle.standardError.write(Data("MemoryBarHelper: \(error)\n".utf8))
+    FileHandle.standardError.write(Data("KiyomemoHelper: \(error)\n".utf8))
     exit(1)
 }

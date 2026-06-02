@@ -1,7 +1,17 @@
 import Darwin
 import Foundation
 
-private let memoryBarHelperSocketPath = "/var/run/dev.memorybar.helper.sock"
+private let helperSocketPath = "/var/run/dev.kiyomemo.helper.sock"
+
+enum MenuBarBadgeContent: String {
+    case percentage
+    case name
+}
+
+enum MenuBarBadgeTone: String {
+    case normal
+    case muted
+}
 
 struct MemorySnapshot {
     var total: UInt64 = ProcessInfo.processInfo.physicalMemory
@@ -61,7 +71,14 @@ struct MemorySnapshot {
 
 @MainActor
 final class MemoryMonitor: ObservableObject {
+    private static let refreshIntervalKey = "refreshIntervalSeconds"
+    private static let menuBarBadgeContentKey = "menuBarBadgeContent"
+    private static let menuBarBadgeToneKey = "menuBarBadgeTone"
+
     @Published private(set) var snapshot = MemorySnapshot.read()
+    @Published private(set) var refreshIntervalSeconds: Int
+    @Published private(set) var menuBarBadgeContent: MenuBarBadgeContent
+    @Published private(set) var menuBarBadgeTone: MenuBarBadgeTone
     @Published private(set) var cacheCleanupIsRunning = false
     @Published private(set) var helperIsInstalled = false
     @Published private(set) var helperInstallationIsRunning = false
@@ -70,22 +87,54 @@ final class MemoryMonitor: ObservableObject {
     private var timer: Timer?
 
     init() {
+        let savedInterval = UserDefaults.standard.integer(forKey: Self.refreshIntervalKey)
+        refreshIntervalSeconds = savedInterval > 0 ? savedInterval : 2
+        menuBarBadgeContent = MenuBarBadgeContent(
+            rawValue: UserDefaults.standard.string(forKey: Self.menuBarBadgeContentKey) ?? ""
+        ) ?? .percentage
+        menuBarBadgeTone = MenuBarBadgeTone(
+            rawValue: UserDefaults.standard.string(forKey: Self.menuBarBadgeToneKey) ?? ""
+        ) ?? .normal
         refresh()
         start()
     }
 
     func start() {
         guard timer == nil else { return }
-        timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(
+            withTimeInterval: TimeInterval(refreshIntervalSeconds),
+            repeats: true
+        ) { [weak self] _ in
             Task { @MainActor in
                 self?.refresh()
             }
         }
     }
 
+    func updateRefreshInterval(seconds: Int) {
+        let interval = min(max(seconds, 1), 3_600)
+        guard interval != refreshIntervalSeconds else { return }
+
+        refreshIntervalSeconds = interval
+        UserDefaults.standard.set(interval, forKey: Self.refreshIntervalKey)
+        timer?.invalidate()
+        timer = nil
+        start()
+    }
+
+    func updateMenuBarBadgeContent(_ content: MenuBarBadgeContent) {
+        menuBarBadgeContent = content
+        UserDefaults.standard.set(content.rawValue, forKey: Self.menuBarBadgeContentKey)
+    }
+
+    func updateMenuBarBadgeTone(_ tone: MenuBarBadgeTone) {
+        menuBarBadgeTone = tone
+        UserDefaults.standard.set(tone.rawValue, forKey: Self.menuBarBadgeToneKey)
+    }
+
     func refresh() {
         snapshot = .read()
-        helperIsInstalled = FileManager.default.fileExists(atPath: memoryBarHelperSocketPath)
+        helperIsInstalled = FileManager.default.fileExists(atPath: helperSocketPath)
     }
 
     func cleanFileCache() {
@@ -178,18 +227,18 @@ final class MemoryMonitor: ObservableObject {
         var address = sockaddr_un()
         address.sun_family = sa_family_t(AF_UNIX)
         let maxPathLength = MemoryLayout.size(ofValue: address.sun_path)
-        guard memoryBarHelperSocketPath.utf8.count < maxPathLength else {
+        guard helperSocketPath.utf8.count < maxPathLength else {
             throw POSIXError(.ENAMETOOLONG)
         }
         withUnsafeMutablePointer(to: &address.sun_path) { pathPointer in
             pathPointer.withMemoryRebound(to: CChar.self, capacity: maxPathLength) { destination in
-                _ = memoryBarHelperSocketPath.withCString { source in
+                _ = helperSocketPath.withCString { source in
                     strncpy(destination, source, maxPathLength - 1)
                 }
             }
         }
 
-        let length = socklen_t(MemoryLayout<sa_family_t>.size + memoryBarHelperSocketPath.utf8.count + 1)
+        let length = socklen_t(MemoryLayout<sa_family_t>.size + helperSocketPath.utf8.count + 1)
         let result = withUnsafePointer(to: &address) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
                 connect(descriptor, $0, length)

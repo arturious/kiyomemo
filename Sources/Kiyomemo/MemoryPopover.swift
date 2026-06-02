@@ -57,7 +57,7 @@ struct MemoryPopover: View {
                 memoryBadge("Free", value: monitor.snapshot.available)
             }
 
-            asciiMemoryBar
+            asciiMemoryMeter
         }
     }
 
@@ -79,7 +79,7 @@ struct MemoryPopover: View {
         }
     }
 
-    private var asciiMemoryBar: some View {
+    private var asciiMemoryMeter: some View {
         let usedPercentage = monitor.snapshot.usedPercentage
         let freePercentage = monitor.snapshot.freePercentage
         let font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
@@ -96,7 +96,7 @@ struct MemoryPopover: View {
 
         var bar = AttributedString("\(usedPercentage)% [")
         var filled = AttributedString(String(repeating: "#", count: filledCount))
-        filled.foregroundColor = .green
+        filled.foregroundColor = .green.opacity(0.72)
         bar += filled
         bar += AttributedString(String(repeating: ".", count: segmentCount - filledCount))
         bar += AttributedString("] \(freePercentage)%")
@@ -134,8 +134,8 @@ struct MemoryPopover: View {
 
                 Spacer()
 
-                toolbarButton("Quit", isMuted: true) {
-                    NSApplication.shared.terminate(nil)
+                toolbarButton("Settings", isMuted: true) {
+                    SettingsWindowController.shared.show(monitor: monitor)
                 }
             }
 
@@ -402,7 +402,7 @@ private struct ToastView: View {
     }
 }
 
-private struct MenuBarBadgeButtonStyle: ButtonStyle {
+struct MenuBarBadgeButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     var isHighlighted = false
     var isMuted = false

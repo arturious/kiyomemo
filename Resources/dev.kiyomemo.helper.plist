@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>dev.memorybar.helper</string>
+    <string>dev.kiyomemo.helper</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Library/PrivilegedHelperTools/dev.memorybar.helper</string>
+        <string>/Library/PrivilegedHelperTools/dev.kiyomemo.helper</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -15,6 +15,6 @@
     <key>ProcessType</key>
     <string>Background</string>
     <key>StandardErrorPath</key>
-    <string>/var/log/dev.memorybar.helper.log</string>
+    <string>/var/log/dev.kiyomemo.helper.log</string>
 </dict>
 </plist>

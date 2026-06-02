@@ -3,22 +3,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "MemoryBar",
+    name: "Kiyomemo",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "MemoryBar", targets: ["MemoryBar"]),
-        .executable(name: "MemoryBarHelper", targets: ["MemoryBarHelper"])
+        .executable(name: "Kiyomemo", targets: ["Kiyomemo"]),
+        .executable(name: "KiyomemoHelper", targets: ["KiyomemoHelper"])
     ],
     targets: [
         .executableTarget(
-            name: "MemoryBar",
-            path: "Sources/MemoryBar"
+            name: "Kiyomemo",
+            path: "Sources/Kiyomemo"
         ),
         .executableTarget(
-            name: "MemoryBarHelper",
-            path: "Sources/MemoryBarHelper"
+            name: "KiyomemoHelper",
+            path: "Sources/KiyomemoHelper"
         )
     ]
 )
