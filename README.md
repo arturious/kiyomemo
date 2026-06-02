@@ -11,6 +11,9 @@ Download the latest `.dmg` from
 [Releases](../../releases/latest), open it, and drag
 `Kiyomemo.app` into `Applications`.
 
+Kiyomemo checks GitHub Releases for verified updates and can install new
+versions automatically.
+
 ## Cache Clearing
 
 Kiyomemo uses the built-in macOS `/usr/sbin/purge` utility. It clears the disk

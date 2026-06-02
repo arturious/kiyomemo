@@ -11,9 +11,15 @@ let package = Package(
         .executable(name: "Kiyomemo", targets: ["Kiyomemo"]),
         .executable(name: "KiyomemoHelper", targets: ["KiyomemoHelper"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.9.2")
+    ],
     targets: [
         .executableTarget(
             name: "Kiyomemo",
+            dependencies: [
+                .product(name: "Sparkle", package: "Sparkle")
+            ],
             path: "Sources/Kiyomemo"
         ),
         .executableTarget(

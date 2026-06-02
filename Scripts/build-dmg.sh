@@ -10,7 +10,7 @@ VERSION="${1:-dev}"
 DMG_PATH="$OUTPUT_DIR/Kiyomemo-$VERSION.dmg"
 
 cd "$ROOT_DIR"
-./Scripts/build-app.sh
+./Scripts/build-app.sh "$VERSION"
 
 rm -rf "$STAGING_DIR"
 rm -f "$DMG_PATH"

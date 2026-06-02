@@ -19,11 +19,25 @@ jobs:
       - name: Build DMG
         run: ./Scripts/build-dmg.sh "$GITHUB_REF_NAME"
 
+      - name: Generate signed appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          mkdir -p outputs/updates
+          cp "outputs/Kiyomemo-$GITHUB_REF_NAME.dmg" outputs/updates/
+          echo "$SPARKLE_PRIVATE_KEY" | \
+            .build/artifacts/sparkle/Sparkle/bin/generate_appcast \
+              --ed-key-file - \
+              --download-url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/" \
+              -o outputs/appcast.xml \
+              outputs/updates
+
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
             "outputs/Kiyomemo-$GITHUB_REF_NAME.dmg" \
+            "outputs/appcast.xml" \
             --generate-notes \
             --title "$GITHUB_REF_NAME"

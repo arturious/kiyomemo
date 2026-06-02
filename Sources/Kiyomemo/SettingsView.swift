@@ -75,6 +75,24 @@ struct SettingsView: View {
 
             Divider()
 
+            settingRow("Updates") {
+                Button {
+                    SparkleUpdater.shared.checkForUpdates()
+                } label: {
+                    Text("Check for Updates")
+                }
+                .buttonStyle(MenuBarBadgeButtonStyle(isMuted: true))
+            }
+
+            Text("Updates install automatically after verification")
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary.opacity(0.7))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+
+            Divider()
+
             ZStack {
                 Button {
                     applyInterval()
@@ -183,7 +201,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
 
         let panel = SettingsPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 300, height: 198),
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 267),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false

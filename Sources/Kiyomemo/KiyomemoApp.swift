@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct KiyomemoApp: App {
     @StateObject private var monitor = MemoryMonitor()
+    private let updater = SparkleUpdater.shared
 
     private static func menuBarIcon(
         freePercentage: Int,
