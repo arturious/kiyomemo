@@ -7,6 +7,7 @@ struct SettingsView: View {
 
     @FocusState private var intervalIsFocused: Bool
     @State private var intervalText = ""
+    @StateObject private var launchAtLogin = LaunchAtLoginController.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -81,6 +82,44 @@ struct SettingsView: View {
 
             Divider()
 
+            settingRow("Launch at login") {
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: { launchAtLogin.isEnabled },
+                        set: { launchAtLogin.setEnabled($0) }
+                    )
+                )
+                .labelsHidden()
+                .toggleStyle(.checkbox)
+            }
+
+            if launchAtLogin.requiresApproval {
+                HStack {
+                    Text("Approval required in System Settings")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary.opacity(0.7))
+
+                    Spacer()
+
+                    Button("Open") {
+                        launchAtLogin.openSystemSettings()
+                    }
+                    .buttonStyle(MenuBarBadgeButtonStyle(isMuted: true))
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+            } else if let message = launchAtLogin.statusMessage {
+                Text(message)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary.opacity(0.7))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+            }
+
+            Divider()
+
             settingRow("Updates") {
                 Button {
                     SparkleUpdater.shared.checkForUpdates()
@@ -124,6 +163,7 @@ struct SettingsView: View {
         .frame(width: 300)
         .onAppear {
             intervalText = String(monitor.refreshIntervalSeconds)
+            launchAtLogin.refresh()
         }
         .onChange(of: intervalIsFocused) { _, isFocused in
             if !isFocused {
@@ -211,7 +251,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
 
         let panel = SettingsPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 300, height: 267),
+            contentRect: NSRect(x: 0, y: 0, width: 300, height: 306),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
