@@ -13,6 +13,29 @@ enum MenuBarBadgeTone: String {
     case muted
 }
 
+enum MemoryPressureLevel {
+    case normal
+    case warning
+    case critical
+
+    static func read() -> MemoryPressureLevel {
+        var level: Int32 = 0
+        var size = MemoryLayout<Int32>.size
+        guard sysctlbyname("kern.memorystatus_vm_pressure_level", &level, &size, nil, 0) == 0 else {
+            return .normal
+        }
+
+        switch level {
+        case 4:
+            return .critical
+        case 2:
+            return .warning
+        default:
+            return .normal
+        }
+    }
+}
+
 struct MemorySnapshot {
     var total: UInt64 = ProcessInfo.processInfo.physicalMemory
     var free: UInt64 = 0
@@ -79,6 +102,7 @@ final class MemoryMonitor: ObservableObject {
     @Published private(set) var refreshIntervalSeconds: Int
     @Published private(set) var menuBarBadgeContent: MenuBarBadgeContent
     @Published private(set) var menuBarBadgeTone: MenuBarBadgeTone
+    @Published private(set) var memoryPressureLevel = MemoryPressureLevel.read()
     @Published private(set) var cacheCleanupIsRunning = false
     @Published private(set) var helperIsInstalled = false
     @Published private(set) var helperInstallationIsRunning = false
@@ -134,6 +158,7 @@ final class MemoryMonitor: ObservableObject {
 
     func refresh() {
         snapshot = .read()
+        memoryPressureLevel = .read()
         helperIsInstalled = FileManager.default.fileExists(atPath: helperSocketPath)
     }
 

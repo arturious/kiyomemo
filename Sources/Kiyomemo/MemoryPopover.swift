@@ -77,20 +77,14 @@ struct MemoryPopover: View {
             }
 
             asciiMemoryMeter
+            memoryPressureBadge
         }
     }
 
     private func memoryBadge(_ title: String, value: UInt64) -> some View {
         HStack(spacing: 5) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .padding(.horizontal, 6)
-                .frame(height: 20)
-                .foregroundStyle(.primary.opacity(0.82))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(.primary.opacity(0.72), lineWidth: 1)
-                }
+                .menuBarOutlineBadge()
 
             Text(value.shortByteCount)
                 .font(.system(size: 11))
@@ -126,6 +120,18 @@ struct MemoryPopover: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var memoryPressureBadge: some View {
+        HStack(spacing: 5) {
+            Text("Pressure")
+                .menuBarOutlineBadge()
+
+            Text(memoryPressureTitle)
+                .font(.system(size: 11))
+                .foregroundStyle(memoryPressureColor)
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
     private var breakdown: some View {
         Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 4) {
             metricRow("Used", monitor.snapshot.used)
@@ -134,6 +140,28 @@ struct MemoryPopover: View {
             metricRow("Purgeable", monitor.snapshot.purgeable)
         }
         .font(.system(size: 11))
+    }
+
+    private var memoryPressureTitle: String {
+        switch monitor.memoryPressureLevel {
+        case .normal:
+            return "normal"
+        case .warning:
+            return "warning"
+        case .critical:
+            return "critical"
+        }
+    }
+
+    private var memoryPressureColor: Color {
+        switch monitor.memoryPressureLevel {
+        case .normal:
+            return .green.opacity(0.72)
+        case .warning:
+            return .yellow.opacity(0.82)
+        case .critical:
+            return .red.opacity(0.82)
+        }
     }
 
     private var toolbar: some View {
@@ -241,6 +269,19 @@ struct MemoryPopover: View {
         }
     }
 
+}
+
+private extension View {
+    func menuBarOutlineBadge() -> some View {
+        font(.system(size: 11, weight: .semibold))
+            .padding(.horizontal, 6)
+            .frame(height: 20)
+            .foregroundStyle(.primary.opacity(0.82))
+            .overlay {
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(.primary.opacity(0.72), lineWidth: 1)
+            }
+    }
 }
 
 private struct PhysicalKeyMonitor: NSViewRepresentable {
