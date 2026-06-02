@@ -25,7 +25,17 @@ struct MemoryPopover: View {
         }
         .frame(width: 292)
         .background {
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(nsColor: NSColor(white: 0.025, alpha: 0.86)))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(.primary.opacity(0.32), lineWidth: 1)
+        }
+        .background {
             PopoverWindowReader { window in
+                configurePopoverWindow(window)
                 ToastPanelController.shared.anchorWindow = window
             }
         }
@@ -45,6 +55,15 @@ struct MemoryPopover: View {
             guard let message else { return }
             ToastPanelController.shared.show(message)
         }
+    }
+
+    private func configurePopoverWindow(_ window: NSWindow?) {
+        guard let window else { return }
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.contentView?.wantsLayer = true
+        window.contentView?.layer?.cornerRadius = 16
+        window.contentView?.layer?.masksToBounds = true
     }
 
     private var summary: some View {

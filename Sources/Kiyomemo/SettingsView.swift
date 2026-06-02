@@ -10,10 +10,16 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Text("kiyomemo")
-                .font(.system(size: 13, weight: .medium).italic())
+            HStack {
+                Text("v\(currentVersion)")
+
+                Spacer()
+
+                Text("kiyomemo")
+                    .italic()
+            }
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary.opacity(0.7))
-                .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
 
@@ -184,6 +190,10 @@ struct SettingsView: View {
             guard let window = NSApplication.shared.keyWindow else { return }
             window.makeFirstResponder(window.contentView)
         }
+    }
+
+    private var currentVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
     }
 }
 
