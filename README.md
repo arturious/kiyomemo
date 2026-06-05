@@ -1,4 +1,4 @@
-# Kiyomemo
+# kiyomemo
 
 kiyomemo is a lightweight native macOS menu bar utility for monitoring memory
 usage and clearing the file cache on demand.
