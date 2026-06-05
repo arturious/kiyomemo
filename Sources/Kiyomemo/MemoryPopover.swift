@@ -172,13 +172,6 @@ struct MemoryPopover: View {
                     refreshButton
                 }
 
-                if !monitor.helperIsInstalled {
-                    toolbarButton("Install Helper") {
-                        monitor.installHelper()
-                    }
-                    .disabled(monitor.helperInstallationIsRunning)
-                }
-
                 Spacer()
 
                 toolbarButton("Settings", isMuted: true) {
@@ -188,7 +181,11 @@ struct MemoryPopover: View {
 
             VStack(spacing: 3) {
                 shortcutHint(systemName: "return")
-                clearCacheButton
+                if monitor.helperIsInstalled {
+                    clearCacheButton
+                } else {
+                    installHelperButton
+                }
             }
         }
     }
@@ -247,6 +244,13 @@ struct MemoryPopover: View {
         }
         .buttonStyle(MenuBarBadgeButtonStyle())
         .disabled(monitor.cacheCleanupIsRunning || !monitor.helperIsInstalled)
+    }
+
+    private var installHelperButton: some View {
+        toolbarButton("Install Helper") {
+            monitor.installHelper()
+        }
+        .disabled(monitor.helperInstallationIsRunning)
     }
 
     private func toolbarButton(
