@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:kiyomemo}",
+            "name": "Debug Kiyomemo",
+            "target": "Kiyomemo",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug Kiyomemo"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:kiyomemo}",
+            "name": "Release Kiyomemo",
+            "target": "Kiyomemo",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release Kiyomemo"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:kiyomemo}",
+            "name": "Debug KiyomemoHelper",
+            "target": "KiyomemoHelper",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug KiyomemoHelper"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:kiyomemo}",
+            "name": "Release KiyomemoHelper",
+            "target": "KiyomemoHelper",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release KiyomemoHelper"
+        }
+    ]
+}
