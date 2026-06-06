@@ -10,7 +10,7 @@ usage and clearing the file cache on demand.
 Install with curl:
 
 ```sh
-curl -fsSL https://kiyomemo.app/install | bash
+curl -fsSL https://arturious.github.io/kiyomemo/install | bash
 ```
 
 Install with Homebrew:
