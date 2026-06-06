@@ -7,6 +7,12 @@ usage and clearing the file cache on demand.
 
 ## Install
 
+Install with curl:
+
+```sh
+curl -fsSL https://kiyomemo.app/install | bash
+```
+
 Install with Homebrew:
 
 ```sh

@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO="arturious/kiyomemo"
+APP_NAME="Kiyomemo"
+APP_BUNDLE="$APP_NAME.app"
+INSTALL_DIR="/Applications"
+
+info() {
+  printf '%s\n' "$*"
+}
+
+fail() {
+  printf 'Error: %s\n' "$*" >&2
+  exit 1
+}
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || fail "$1 is required"
+}
+
+shell_quote() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+}
+
+apple_script_quote() {
+  printf '"%s"' "$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+}
+
+need awk
+need curl
+need hdiutil
+need osascript
+need sed
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  fail "$APP_NAME can only be installed on macOS"
+fi
+
+TMP_DIR="$(mktemp -d)"
+DMG_PATH="$TMP_DIR/$APP_NAME.dmg"
+MOUNT_DIR=""
+
+cleanup() {
+  if [[ -n "$MOUNT_DIR" && -d "$MOUNT_DIR" ]]; then
+    hdiutil detach "$MOUNT_DIR" -quiet >/dev/null 2>&1 || true
+  fi
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+info "Fetching latest $APP_NAME release..."
+RELEASE_JSON="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest")"
+VERSION="$(printf '%s' "$RELEASE_JSON" | awk -F '"' '/"tag_name":/ { print $4; exit }')"
+DMG_URL="$(printf '%s' "$RELEASE_JSON" | awk -F '"' '/"browser_download_url":/ && /Kiyomemo-v.*\.dmg/ { print $4; exit }')"
+
+[[ -n "$VERSION" ]] || fail "Could not determine latest version"
+[[ -n "$DMG_URL" ]] || fail "Could not find DMG asset in latest release"
+
+info "Downloading $APP_NAME $VERSION..."
+curl -fL --progress-bar -o "$DMG_PATH" "$DMG_URL"
+
+info "Mounting DMG..."
+ATTACH_PLIST="$TMP_DIR/attach.plist"
+hdiutil attach "$DMG_PATH" -nobrowse -readonly -plist > "$ATTACH_PLIST"
+MOUNT_DIR="$(
+  awk '
+    /<key>mount-point<\/key>/ {
+      getline
+      gsub(/^[[:space:]]*<string>/, "")
+      gsub(/<\/string>[[:space:]]*$/, "")
+      print
+      exit
+    }
+  ' "$ATTACH_PLIST"
+)"
+[[ -n "$MOUNT_DIR" && -d "$MOUNT_DIR" ]] || fail "Could not mount DMG"
+[[ -d "$MOUNT_DIR/$APP_BUNDLE" ]] || fail "$APP_BUNDLE not found in DMG"
+
+if pgrep -x "$APP_NAME" >/dev/null 2>&1; then
+  info "Closing running $APP_NAME..."
+  osascript -e "tell application \"$APP_NAME\" to quit" >/dev/null 2>&1 || true
+  sleep 1
+fi
+
+info "Installing to $INSTALL_DIR..."
+if ! rm -rf "$INSTALL_DIR/$APP_BUNDLE" 2>/dev/null || ! cp -R "$MOUNT_DIR/$APP_BUNDLE" "$INSTALL_DIR/" 2>/dev/null; then
+  info "Requesting administrator permission..."
+  INSTALL_COMMAND="rm -rf $(shell_quote "$INSTALL_DIR/$APP_BUNDLE") && cp -R $(shell_quote "$MOUNT_DIR/$APP_BUNDLE") $(shell_quote "$INSTALL_DIR/")"
+  osascript -e "do shell script $(apple_script_quote "$INSTALL_COMMAND") with administrator privileges" >/dev/null
+fi
+
+info "Opening $APP_NAME..."
+open "$INSTALL_DIR/$APP_BUNDLE"
+
+info "$APP_NAME $VERSION installed."
