@@ -2,7 +2,7 @@
   <h1>kiyomemo</h1>
 
   <a href="https://github.com/arturious/kiyomemo/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/arturious/kiyomemo?display_name=tag&label=release&color=blue"></a>
-  <a href="https://github.com/arturious/kiyomemo/releases"><img alt="DMG downloads" src="https://img.shields.io/endpoint?url=https%3A%2F%2Farturious.github.io%2Fkiyomemo%2Fdmg-downloads.json"></a>
+  <a href="https://github.com/arturious/kiyomemo/releases"><img alt="downloads" src="https://img.shields.io/endpoint?url=https%3A%2F%2Farturious.github.io%2Fkiyomemo%2Fdmg-downloads.json"></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-GPL%20v3-blue"></a>
 </div>
 
@@ -13,13 +13,13 @@ usage and clearing the file cache on demand.
 
 ## Install
 
-Install with curl:
+Install via script:
 
 ```sh
 curl -fsSL https://arturious.github.io/kiyomemo/install | bash
 ```
 
-Install with Homebrew:
+Or via Homebrew:
 
 ```sh
 brew install --cask arturious/tap/kiyomemo
