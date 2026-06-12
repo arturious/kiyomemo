@@ -157,6 +157,8 @@ struct SettingsView: View {
                 .padding(.bottom, 8)
             }
 
+            Spacer(minLength: 8)
+
             Divider()
 
             settingRow("Updates") {
@@ -174,8 +176,6 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
-
-            Spacer(minLength: 8)
 
             Divider()
 
