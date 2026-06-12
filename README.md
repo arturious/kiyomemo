@@ -1,5 +1,8 @@
 # kiyomemo
 
+[![Latest release](https://img.shields.io/github/v/release/arturious/kiyomemo?display_name=tag&style=flat-square)](https://github.com/arturious/kiyomemo/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/arturious/kiyomemo/total?style=flat-square)](https://github.com/arturious/kiyomemo/releases)
+
 kiyomemo is a lightweight native macOS menu bar utility for monitoring memory
 usage and clearing the file cache on demand.
 
