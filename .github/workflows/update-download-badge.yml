@@ -1,4 +1,4 @@
-name: Update DMG download badge
+name: Update download badge
 
 on:
   schedule:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Count DMG downloads
+      - name: Count downloads
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -26,8 +26,8 @@ jobs:
 
           jq --arg downloads "$downloads" \
             '.message = $downloads' \
-            docs/dmg-downloads.json > docs/dmg-downloads.json.tmp
-          mv docs/dmg-downloads.json.tmp docs/dmg-downloads.json
+            docs/downloads.json > docs/downloads.json.tmp
+          mv docs/downloads.json.tmp docs/downloads.json
 
       - name: Commit badge data
         run: |
@@ -37,6 +37,6 @@ jobs:
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add docs/dmg-downloads.json
-          git commit -m "Update DMG download badge"
+          git add docs/downloads.json
+          git commit -m "Update download badge"
           git push
