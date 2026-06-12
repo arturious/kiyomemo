@@ -1,0 +1,42 @@
+name: Update DMG download badge
+
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Count DMG downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          downloads="$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/releases" \
+              --jq '[.[] | .assets[] | select(.name | endswith(".dmg")) | .download_count] | add // 0'
+          )"
+
+          jq --arg downloads "$downloads" \
+            '.message = $downloads' \
+            docs/dmg-downloads.json > docs/dmg-downloads.json.tmp
+          mv docs/dmg-downloads.json.tmp docs/dmg-downloads.json
+
+      - name: Commit badge data
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/dmg-downloads.json
+          git commit -m "Update DMG download badge"
+          git push
