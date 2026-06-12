@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct KiyomemoApp: App {
+    @NSApplicationDelegateAdaptor(KiyomemoAppDelegate.self) private var appDelegate
     @StateObject private var monitor = MemoryMonitor()
     private let updater = SparkleUpdater.shared
     private let launchAtLogin = LaunchAtLoginController.shared
@@ -64,5 +65,14 @@ struct KiyomemoApp: App {
             )
         }
         .menuBarExtraStyle(.window)
+    }
+}
+
+private final class KiyomemoAppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(500))
+            DockSwipeQuitController.shared.refreshPermissions()
+        }
     }
 }

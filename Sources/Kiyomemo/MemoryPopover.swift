@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MemoryPopover: View {
     @ObservedObject var monitor: MemoryMonitor
+    @ObservedObject private var updater = SparkleUpdater.shared
     @State private var refreshIsAnimating = false
 
     var body: some View {
@@ -37,6 +38,10 @@ struct MemoryPopover: View {
             PopoverWindowReader { window in
                 configurePopoverWindow(window)
                 ToastPanelController.shared.anchorWindow = window
+
+                if window?.isVisible == true, let message = updater.consumeUpdateMessage() {
+                    ToastPanelController.shared.show(message)
+                }
             }
         }
         .background {
@@ -53,6 +58,18 @@ struct MemoryPopover: View {
         }
         .onChange(of: monitor.lastMessage) { _, message in
             guard let message else { return }
+            ToastPanelController.shared.show(message)
+        }
+        .onChange(of: updater.updateMessage) { _, message in
+            guard let message,
+                  ToastPanelController.shared.anchorWindow?.isVisible == true else { return }
+            ToastPanelController.shared.show(message)
+            _ = updater.consumeUpdateMessage()
+        }
+        .task {
+            try? await Task.sleep(for: .milliseconds(120))
+            guard ToastPanelController.shared.anchorWindow?.isVisible == true,
+                  let message = updater.consumeUpdateMessage() else { return }
             ToastPanelController.shared.show(message)
         }
     }

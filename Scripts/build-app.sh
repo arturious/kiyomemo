@@ -66,5 +66,9 @@ PLIST
 
 codesign --force --sign - "$RESOURCES_DIR/dev.kiyomemo.helper"
 codesign --force --sign - "$FRAMEWORKS_DIR/Sparkle.framework"
-codesign --force --sign - "$APP_DIR"
+codesign \
+    --force \
+    --sign - \
+    --requirements '=designated => identifier "dev.kiyomemo.app"' \
+    "$APP_DIR"
 echo "Built $APP_DIR"
